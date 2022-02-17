@@ -5,6 +5,7 @@ const IDLE_WARNING_SEC = 270;
 const _ = require('lodash');
 const { app } = require('electron');
 const ioHook = require('iohook');
+const { getActiveProcessName } = require('windows-active-process');
 const sound = require('sound-play');
 const path = require('path');
 const log4js = require('log4js');
@@ -20,7 +21,17 @@ function doIdleWarning() {
     timer = null;
 }
 
+function isRuneScapeActive() {
+    const activeProcess = getActiveProcessName();
+    return activeProcess != null &&
+            activeProcess.endsWith('rs2client.exe');
+}
+
 function resetTimer() {
+    if (!isRuneScapeActive()) {
+        logger.debug('RuneScape window not active, not resetting timer');
+        return;
+    }
     if (timer !== null) {
         clearTimeout(timer);
     }
